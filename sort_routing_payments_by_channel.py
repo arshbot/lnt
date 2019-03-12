@@ -93,7 +93,7 @@ print("")
 print("Most payments routed")
 for route in sort_by_earned_fees:
     from_route, to_route = route[0].split("-")
-    print("#{} - {} to {} earned {} satoshis".format(counter, from_route, to_route, route[1][2]))
+    print("#{} - {} to {} routed {} payments".format(counter, from_route, to_route, route[1][2]))
     counter += 1
     if counter > args.num_to_print:
         break
