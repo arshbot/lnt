@@ -34,6 +34,9 @@ optional arguments:
 ### env variables that will be required by these tools
 
 `MACAROON_PATH`	Path to admin.macaroon
+
 `TLS_CERT_PATH` Path to tls.cert
+
 `LND_URL` url for lnd node including port
+
 `GRPC_SSL_CIPHER_SUITES`="HIGH+ECDSA"
