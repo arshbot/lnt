@@ -4,13 +4,11 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-ptpython = "*"
 
 [packages]
+grpcio-tools = "*"
 googleapis-common-protos = "*"
 grpcio = "*"
-grpcio-tools = "*"
-ptpdb = "*"
 
 [requires]
 python_version = "3.7"
