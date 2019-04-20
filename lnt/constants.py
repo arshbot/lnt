@@ -1,0 +1,2 @@
+DEFAULT_LNT_DIR = "$HOME/.lnt"
+
