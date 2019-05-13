@@ -1,6 +1,7 @@
 import os, sys, click
 from .constants import DEFAULT_DIR_PATH
 from .utils import *
+from lnt.commands import create as cmd_create
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix='COMPLEX')
 
@@ -68,40 +69,30 @@ def main(ctx, config, verbose):
 #    ctx.config = parsed_config
     ctx.verbose = verbose
 
-@main.group()
-@click.pass_context
-def test(ctz):
-    """ TEST """
-    return
-
-@test.command("fuck")
-@click.pass_context
-def test_fuck(ctx):
-    return
 
 @main.group()
 # @click.command("create", short_help="Creates a new object with associated settings")
 @click.pass_context
 def create(ctx):
-    click.echo("create called!")
+    """ Creates a new channel, rebalance, invoice, or payment """
     return
 
 @create.command()
 def channel():
-    click.echo("Channel created")
+    cmd_create.channel()
     return
 
 @create.command()
 def rebalance():
-    click.echo("Rebalance created")
+    cmd_create.rebalance()
     return
 
 @create.command()
 def invoice():
-    click.echo("Invoice created")
+    cmd_create.invoice()
     return
 
 @create.command()
 def payment():
-    click.echo("Payment created")
+    cmd_create.payment()
     return
