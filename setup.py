@@ -10,6 +10,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        lnt=lnt.cli:cli
+        lnt=lnt.cli:main
     ''',
 )
