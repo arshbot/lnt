@@ -1,4 +1,5 @@
 import os, sys, click
+from configparser import ParsingError, ConfigParser
 from .constants import DEFAULT_DIR_PATH
 from .utils import *
 from lnt.commands import create as cmd_create
@@ -53,20 +54,34 @@ def main(ctx, config, verbose):
     """ lnt is a command line tool designed to be a better lncli for sysadmins
     and consumers
     """
-    # TODO: parse and load config file
-    # TODO: if no config file at default, and no conf file specified, create
-    # new conf dir
+    # TODO: Allow for custom lnt dir
+    # TODO: Set config to config_path in param
+    config_path = config
 
-    if not config:
-        ensure_default_config_exists()
-    elif check_config_exists(config):
-        # TODO: Parse config
-        parsed_config = None
-        pass
-    else:
-        raise Exception("invalid config file provided")
 
-#    ctx.config = parsed_config
+    if not config_path:
+
+        # Default lnt dir is in constants.py
+        if not check_lnt_folder_exists():
+            create_lnt_folder()
+
+        # Checks if the default config is available
+        if not check_config_exists():
+            create_config()
+            raise click.FileError(filename="config", hint="Error: please configure config at "+const.DEFAULT_CONF_PATH)
+
+        config_path = const.DEFAULT_CONF_PATH
+
+    config = ConfigParser()
+
+    # Config validation
+    try:
+        config.read(config_path)
+        validate_config(config)
+    except ParsingError:
+        raise Exception("Invalid config file provided")
+
+    ctx.config = config
     ctx.verbose = verbose
 
 
