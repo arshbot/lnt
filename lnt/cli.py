@@ -44,8 +44,8 @@ class ComplexCLI(click.MultiCommand):
 
 # @click.command(cls=ComplexCLI, context_settings=CONTEXT_SETTINGS)
 @click.group()
-@click.option('--config', metavar='CONFIG', type=click.Path(exists=True,
-     file_okay=True, resolve_path=True),
+@click.option('--config', metavar='CONFIG_PATH', type=click.Path(exists=True,
+     file_okay=True, resolve_path=True, readable=True),
          help="Points to a non default config file")
 @click.option('--verbose', '-v', is_flag=True, help='Enables verbose mode.')
 @click.pass_context
