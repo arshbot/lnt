@@ -98,8 +98,9 @@ def channel():
     return
 
 @create.command()
-def rebalance():
-    cmd_create.rebalance()
+@click.pass_context
+def rebalance(ctx):
+    cmd_create.rebalance(ctx)
     return
 
 @create.command()
