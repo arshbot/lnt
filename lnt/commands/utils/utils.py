@@ -1,10 +1,12 @@
-import rpc.rpc_pb2 as ln, rpc.rpc_pb2_grpc as lnrpc
+import os, grpc, codecs
+import lnt.rpc.rpc_pb2 as ln, lnt.rpc.rpc_pb2_grpc as lnrpc
 
 def create_stub(ctx):
-    macaroon = codecs.encode(open( , 'rb').read(), 'hex')
+    cfg = ctx.parent.parent.config['LND']
+    macaroon = codecs.encode(open(cfg['MacaroonPath'], 'rb').read(), 'hex')
     os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-    cert = open('/Users/harshagoli/Projects/kubefiles/lnd-staging/tls.cert', 'rb').read()
+    cert = open(cfg['TlsCert'], 'rb').read()
     ssl_creds = grpc.ssl_channel_credentials(cert)
-    channel = grpc.secure_channel('localhost:10009', ssl_creds)
+    channel = grpc.secure_channel(cfg['Host'], ssl_creds)
     stub = lnrpc.LightningStub(channel)
     return stub
