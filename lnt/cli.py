@@ -97,8 +97,10 @@ def channel():
     return
 
 @create.command()
+@click.option('--name', '-n', help="Name a rebalance image")
 @click.pass_context
-def rebalance(ctx):
+def rebalance(ctx, name):
+    ctx.name = name
     cmd_create.rebalance(ctx)
     return
 
