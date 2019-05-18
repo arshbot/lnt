@@ -97,9 +97,11 @@ def channel():
     return
 
 @create.command()
-@click.option('--name', '-n', help="Name a rebalance image")
+@click.option('--max', '-m', is_flag=True, help="Rebalance maximum amount from channels")
+@click.option('--name', '-n', metavar='NAME', help="Name a rebalance image")
 @click.pass_context
-def rebalance(ctx, name):
+def rebalance(ctx, max, name):
+    ctx.max = max
     ctx.name = name
     cmd_create.rebalance(ctx)
     return

@@ -30,8 +30,8 @@ def rebalance(ctx):
     to_channel = prompt(styles.get_channel_choice_to(channels), style=styles.prompt_style)
     to_channel = to_channel['channel_choices_to'].split(",")[1][1:]
 
-    rebase_image = rebal.construct_rebalance_image(channels, from_channels, to_channel)
-
+    rebase_image = rebal.construct_rebalance_image(channels, from_channels,
+            to_channel, ctx.max)
     rebal.write_rebalance_image(rebase_image, ctx.name)
     return
 
