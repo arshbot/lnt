@@ -86,7 +86,6 @@ def main(ctx, config, verbose):
 
 
 @main.group()
-# @click.command("create", short_help="Creates a new object with associated settings")
 @click.pass_context
 def create(ctx):
     """ Creates a new channel, rebalance, invoice, or payment """
