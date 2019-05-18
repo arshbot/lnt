@@ -32,8 +32,7 @@ def rebalance(ctx):
 
     rebase_image = rebal.construct_rebalance_image(channels, from_channels, to_channel)
 
-    print(rebase_image)
-
+    rebal.write_rebalance_image(rebase_image, ctx.name)
     return
 
 def invoice():
