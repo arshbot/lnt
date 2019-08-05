@@ -11,7 +11,7 @@ grpcio-tools = "*"
 googleapis-common-protos = "*"
 grpcio = "*"
 click = "*"
-lnt = {editable = true,path = "."}
+PyInquirer = "*"
 
 [requires]
 python_version = "3.7"
