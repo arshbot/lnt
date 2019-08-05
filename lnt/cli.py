@@ -1,8 +1,10 @@
 import os, sys, click
 from configparser import ParsingError, ConfigParser
-from .constants import DEFAULT_DIR_PATH
-from .utils import *
+from lnt.constants import DEFAULT_DIR_PATH
+from lnt.utils import *
 from lnt.commands import create as cmd_create
+from lnt.commands import view as cmd_view
+
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix='COMPLEX')
 
