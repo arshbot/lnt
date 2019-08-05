@@ -26,7 +26,33 @@ def normalize_channels(channels):
             "total_satoshis_sent": c.total_satoshis_sent,
             "total_satoshis_received": c.total_satoshis_received,
             "num_updates": c.num_updates,
+            "pending_htlcs": c.pending_htlcs,
             "csv_delay": c.csv_delay,
         } for c in channels
     }
     return channels_d
+
+def normalize_get_chan_response(chaninfo):
+    chaninfo_d = {
+        "channel_id": chaninfo.channel_id,
+        "chan_point": chaninfo.chan_point,
+        "last_update": chaninfo.last_update,
+        "node1_pub": chaninfo.node1_pub,
+        "node2_pub": chaninfo.node2_pub,
+        "capacity": chaninfo.capacity,
+        "node1_policy": {
+            "time_lock_delta": chaninfo.node1_policy.time_lock_delta,
+            "min_htlc": chaninfo.node1_policy.min_htlc,
+            "fee_base_msat": chaninfo.node1_policy.fee_base_msat,
+            "fee_rate_milli_msat": chaninfo.node1_policy.fee_rate_milli_msat,
+            "max_htlc_msat": chaninfo.node1_policy.max_htlc_msat,
+        },
+        "node2_policy": {
+            "time_lock_delta": chaninfo.node2_policy.time_lock_delta,
+            "min_htlc": chaninfo.node2_policy.min_htlc,
+            "fee_base_msat": chaninfo.node2_policy.fee_base_msat,
+            "fee_rate_milli_msat": chaninfo.node2_policy.fee_rate_milli_msat,
+            "max_htlc_msat": chaninfo.node2_policy.max_htlc_msat,
+        }
+    }
+    return chaninfo_d
