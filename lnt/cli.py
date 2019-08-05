@@ -117,3 +117,17 @@ def invoice():
 def payment():
     cmd_create.payment()
     return
+
+@main.group()
+@click.pass_context
+def view(ctx):
+    """ View channels, rebalances, invoices, or payments """
+    return
+
+@view.command()
+@click.option('--index', '-i', metavar='INDEX', help="Channel index to output")
+@click.pass_context
+def channel(ctx, index):
+    ctx.index = index
+    cmd_view.channel(ctx)
+    return
