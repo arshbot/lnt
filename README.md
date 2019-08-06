@@ -14,8 +14,10 @@ python setup.py install
 
 From Pypi: 
 
+( googleapis-common-protos must be installed seperately due to a [bug](https://github.com/pypa/pipenv/issues/3886) in pipenv
+
 ```
-pip install lnt
+pip install lnt, googleapis-common-protos
 ```
 
 ## Feature progress
