@@ -9,8 +9,6 @@ import click, grpc
 # Mark Local imports
 from .utils import utils, rebal
 
-from ptpdb import set_trace
-
 def channel(ctx):
     stub, macaroon = utils.create_stub(ctx)
 
@@ -53,8 +51,6 @@ def channel(ctx):
             channels[str(fwd_event.chan_id_out)]['forward_outgoing'] += 1
         except KeyError:
             continue
-
-    set_trace()
 
     click.echo("\n" + "CHANNEL ID".ljust(21) + "CAPACITY".ljust(11) + "LOCAL_BAL".ljust(11) + \
         "LOCAL/CAP   " + "FORWARDS" + "   PENDING HTLCS" + "   LAST USED")
