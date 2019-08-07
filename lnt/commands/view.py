@@ -57,7 +57,7 @@ def channel(ctx):
     set_trace()
 
     click.echo("\n" + "CHANNEL ID".ljust(21) + "CAPACITY".ljust(11) + "LOCAL_BAL".ljust(11) + \
-        "LOCAL/CAP" + "   UPDATE NUM" + "   PENDING HTLCS" + "   LAST USED")
+        "LOCAL/CAP   " + "FORWARDS" + "   PENDING HTLCS" + "   LAST USED")
     for ch_id in channels.keys():
         channel = channels[ch_id]
         click.echo("{} {} {} {}% {} {} {}".format(
@@ -66,8 +66,8 @@ def channel(ctx):
                                 str(channel['local_balance']).ljust(10),
                                 str(round((Decimal(channel['local_balance'])/ \
                                     Decimal(channel['capacity']))*100, 2)).rjust(8),
-                                str(channel['num_updates']).rjust(12),
-                                str(len(channel['pending_htlcs'])).rjust(3).ljust(17),
+                                str(channel['forward_incoming'] + channel['forward_outgoing']).ljust(10).rjust(12),
+                                str(len(channel['pending_htlcs'])).ljust(15),
                                 time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
                                 ))
     return
