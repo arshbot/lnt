@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 ptpython = "*"
+lnt = {path = ".",editable = true}
 
 [packages]
 grpcio-tools = "*"
