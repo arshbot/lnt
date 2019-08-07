@@ -85,7 +85,7 @@ I believe the proper solution is to create ideal states that are executed once i
 To set up this tool for your local development needs:
 
 ```
-git clone --recursive https://github.com/arshbot/lnt.git
+git clone --recursive https://github.com/thesis/lnt.git
 cd lnt
 pipenv shell
 pipenv install lnt/
