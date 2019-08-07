@@ -49,9 +49,8 @@ def channel(ctx):
 
     for fwd_event in tuple(response.forwarding_events):
         try:
-            channels[fwd_event.chan_id_in]['forward_incoming'] += 1
-            channels[fwd_event.chan_id_out]['forward_outgoing'] += 1
-            click.echo("SUCCESS")
+            channels[str(fwd_event.chan_id_in)]['forward_incoming'] += 1
+            channels[str(fwd_event.chan_id_out)]['forward_outgoing'] += 1
         except KeyError:
             continue
 
