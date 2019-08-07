@@ -7,7 +7,7 @@ Lightning Network Tools (lnt) is a toolset for interacting and managing your [ln
 From source:
 
 ```
-git clone --recursive https://github.com/arshbot/lnt.git
+git clone --recursive https://github.com/thesis/lnt.git
 cd lnt
 python setup.py install
 ```
@@ -17,12 +17,13 @@ From Pypi:
 ( googleapis-common-protos must be installed seperately due to a [bug](https://github.com/pypa/pipenv/issues/3886) in pipenv
 
 ```
-pip install lnt, googleapis-common-protos
+pip3 install lnt, googleapis-common-protos
 ```
 
 ## Feature progress
 
 - [x] View channels
+- [ ] forwarding events input into View Channel output
 - [ ] View invoices
 - [ ] View rebalances
 - [ ] View payments
