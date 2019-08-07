@@ -125,9 +125,12 @@ def view(ctx):
     return
 
 @view.command()
-@click.option('--index', '-i', metavar='INDEX', help="Channel index to output")
+# TODO: Add channel row indexing
+# @click.option('--index', '-i', metavar='INDEX', help="Channel index to output")
+@click.option('--monthsago', '-m', metavar='MONTHS_AGO', help="Shows events up to x months ago")
 @click.pass_context
-def channel(ctx, index):
+def channel(ctx, index, monthsago):
     ctx.index = index
+    ctx.monthsago = int(monthsago)
     cmd_view.channel(ctx)
     return

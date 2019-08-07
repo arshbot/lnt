@@ -1,5 +1,5 @@
 # Mark standard lib imports
-import time
+import time, datetime, calendar
 from decimal import Decimal
 
 # Mark 3rd party lib imports
@@ -11,19 +11,49 @@ from .utils import utils, rebal
 
 def channel(ctx):
     stub, macaroon = utils.create_stub(ctx)
+
+    # ListChannels RPC call
     request = ln.ListChannelsRequest(active_only=True)
     response = stub.ListChannels(request, metadata=[('macaroon', macaroon)])
-
     channels = utils.normalize_channels(response.channels)
 
+    monthsago = ctx.monthsago
+    if 'DefaultMonthsAgo' in ctx.find_root().config['LNT'].keys():
+        monthsago = ctx.find_root().config['LNT']['DefaultMonthsAgo']
+
+    # GetChanInfo RPC call ( per channel )
     for ch_id in channels.keys():
         request = ln.ChanInfoRequest(chan_id=int(ch_id))
         response = stub.GetChanInfo(request, metadata=[('macaroon', macaroon)])
         chan_info = utils.normalize_get_chan_response(response)
         channels[ch_id] = { **channels[ch_id], **chan_info }
+        
+        # Prep for ForwardHistory call
+        channels[ch_id]['forward_incoming'] = 0
+        channels[ch_id]['forward_outgoing'] = 0
+
+
+    # ForwardingHistory RPC call
+    fwd_hist_start_time = calendar.timegm((datetime.date.today() - \
+        datetime.timedelta(monthsago*365/12)).timetuple())
+    
+    fwd_hist_end_time = calendar.timegm(datetime.date.today().timetuple())
+    
+    request = ln.ForwardingHistoryRequest(
+        start_time=fwd_hist_start_time,
+        end_time=fwd_hist_end_time,
+    )
+    response = stub.ForwardingHistory(request, metadata=[('macaroon', macaroon)])
+
+    for fwd_event in tuple(response.forwarding_events):
+        try:
+            channels[str(fwd_event.chan_id_in)]['forward_incoming'] += 1
+            channels[str(fwd_event.chan_id_out)]['forward_outgoing'] += 1
+        except KeyError:
+            continue
 
     click.echo("\n" + "CHANNEL ID".ljust(21) + "CAPACITY".ljust(11) + "LOCAL_BAL".ljust(11) + \
-        "LOCAL/CAP" + "   UPDATE NUM" + "   PENDING HTLCS" + "   LAST USED")
+        "LOCAL/CAP   " + "FORWARDS" + "   PENDING HTLCS" + "   LAST USED")
     for ch_id in channels.keys():
         channel = channels[ch_id]
         click.echo("{} {} {} {}% {} {} {}".format(
@@ -32,8 +62,8 @@ def channel(ctx):
                                 str(channel['local_balance']).ljust(10),
                                 str(round((Decimal(channel['local_balance'])/ \
                                     Decimal(channel['capacity']))*100, 2)).rjust(8),
-                                str(channel['num_updates']).rjust(12),
-                                str(len(channel['pending_htlcs'])).rjust(3).ljust(17),
+                                str(channel['forward_incoming'] + channel['forward_outgoing']).ljust(10).rjust(12),
+                                str(len(channel['pending_htlcs'])).ljust(15),
                                 time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
                                 ))
     return
