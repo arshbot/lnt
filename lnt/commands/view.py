@@ -38,15 +38,19 @@ def channel(ctx):
     request = ln.ForwardingHistoryRequest(
         start_time=fwd_hist_start_time,
         end_time=fwd_hist_end_time,
+        num_max_events=10000
     )
     response = stub.ForwardingHistory(request, metadata=[('macaroon', macaroon)])
 
     for fwd_event in tuple(response.forwarding_events):
         try:
             channels[str(fwd_event.chan_id_in)]['forward_incoming'] += 1
+        except KeyError:
+            pass
+        try:
             channels[str(fwd_event.chan_id_out)]['forward_outgoing'] += 1
         except KeyError:
-            continue
+            pass
 
     click.echo("\n" + "CHANNEL ID".ljust(21) + "CAPACITY".ljust(11) + "LOCAL_BAL".ljust(11) + \
         "LOCAL/CAP   " + "FORWARDS" + "   PENDING HTLCS" + "   LAST USED")
