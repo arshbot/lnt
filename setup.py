@@ -1,10 +1,18 @@
 from setuptools import setup
 
+with open("README.md", "r") as fh:
+        long_description = fh.read()
+
 setup(
     name='lnt',
-    version='0.2.1',
-    packages=['lnt', 'lnt.commands', 'lnt.rpc', 'lnt.graphics', 'lnt.commands.utils'],
+    version='0.2.2',
+    author="arshbot",
+    author_email="harshagoli@gmail.com",
     include_package_data=True,
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/thesis/lnt",
+    packages=['lnt', 'lnt.commands', 'lnt.rpc', 'lnt.graphics', 'lnt.commands.utils'],
     install_requires=[
         'click',
         'grpcio-tools',
