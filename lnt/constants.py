@@ -6,6 +6,8 @@ DEFAULT_CONF = "conf"
 DEFAULT_CONF_PATH = DEFAULT_DIR_PATH + "/" + DEFAULT_CONF
 DEFAULT_REBAL_PATH = DEFAULT_DIR_PATH + "/rebalances"
 
+DEFAULT_MONTHS_AGO = 3
+
 EMPTY_CONF ="""
 [LND]
 # Replace the below values with your respective files for your

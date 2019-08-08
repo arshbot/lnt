@@ -1,6 +1,6 @@
 import os, sys, click
 from configparser import ParsingError, ConfigParser
-from lnt.constants import DEFAULT_DIR_PATH
+from lnt.constants import DEFAULT_DIR_PATH, DEFAULT_MONTHS_AGO
 from lnt.utils import *
 from lnt.commands import create as cmd_create
 from lnt.commands import view as cmd_view
@@ -14,11 +14,6 @@ class LntContext(object):
         self.config = {}
         self.verbose = False
 
-    # TODO: Better print implementation
-    # def __repr__(self):
-    #    return '<LntContext %r>' % self.home
-
-# pass_context = click.make_pass_decorator(LntContext)
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                           'commands'))
 
@@ -45,7 +40,6 @@ class ComplexCLI(click.MultiCommand):
         return mod.cli
 
 
-# @click.command(cls=ComplexCLI, context_settings=CONTEXT_SETTINGS)
 @click.group()
 @click.option('--config', metavar='CONFIG_PATH', type=click.Path(exists=True,
      file_okay=True, resolve_path=True, readable=True),
@@ -57,7 +51,6 @@ def main(ctx, config, verbose):
     and consumers
     """
     # TODO: Allow for custom lnt dir
-    # TODO: Set config to config_path in param
     config_path = config
 
 
@@ -127,10 +120,19 @@ def view(ctx):
 @view.command()
 # TODO: Add channel row indexing
 # @click.option('--index', '-i', metavar='INDEX', help="Channel index to output")
+@click.option('--csv', is_flag=True, help="Channel index to output")
 @click.option('--monthsago', '-m', metavar='MONTHS_AGO', help="Shows events up to x months ago")
 @click.pass_context
-def channel(ctx, index, monthsago):
-    ctx.index = index
-    ctx.monthsago = int(monthsago)
+def channel(ctx, csv, monthsago):
+    ctx.csv = csv
+
+    if monthsago:
+        ctx.monthsago = monthsago
+    elif 'MonthsAgo' in ctx.find_root().config['LNT'].keys():
+        ctx.monthsago = ctx.find_root().config['LNT']['MonthsAgo']
+    else:
+        ctx.monthsago = DEFAULT_MONTHS_AGO
+    ctx.monthsago = int(ctx.monthsago)
+
     cmd_view.channel(ctx)
     return
