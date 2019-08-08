@@ -52,18 +52,50 @@ def channel(ctx):
         except KeyError:
             pass
 
-    click.echo("\n" + "CHANNEL ID".ljust(21) + "CAPACITY".ljust(11) + "LOCAL_BAL".ljust(11) + \
-        "LOCAL/CAP   " + "FORWARDS" + "   PENDING HTLCS" + "   LAST USED")
+    if not ctx.csv:
+        header = "\n" + \
+            "CHANNEL ID".ljust(21) + \
+            "CAPACITY".ljust(11) + \
+            "LOCAL_BAL".ljust(11) + \
+            "LOCAL/CAP   " + \
+            "FORWARDS   " + \
+            "PENDING HTLCS   " + \
+            "LAST USED"
+    else:
+        header = ",".join(["CHANNEL ID","CAPACITY","LOCAL_BAL","LOCAL/CAP","FORWARDS","PENDING HTLCS","LAST USED"])
+
+    click.echo(header)
     for ch_id in channels.keys():
         channel = channels[ch_id]
-        click.echo("{} {} {} {}% {} {} {}".format(
-                                str(ch_id).ljust(20),
-                                str(channel['capacity']).ljust(10),
-                                str(channel['local_balance']).ljust(10),
-                                str(round((Decimal(channel['local_balance'])/ \
-                                    Decimal(channel['capacity']))*100, 2)).rjust(8),
-                                str(channel['forward_incoming'] + channel['forward_outgoing']).ljust(10).rjust(12),
-                                str(len(channel['pending_htlcs'])).ljust(15),
-                                time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
-                                ))
+
+        rows = []
+
+        format_str = "{} {} {} {}% {} {} {}"
+        if ctx.csv:
+            format_str = "{},{},{},{}%,{},{},{}"
+
+        if ctx.csv:
+            prnt_str = format_str.format(
+                            str(ch_id),
+                            str(channel['capacity']),
+                            str(channel['local_balance']),
+                            str(round((Decimal(channel['local_balance'])/ \
+                                Decimal(channel['capacity']))*100, 2)),
+                            str(channel['forward_incoming'] + channel['forward_outgoing']),
+                            str(len(channel['pending_htlcs'])),
+                            time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
+                            )
+        else:
+            prnt_str = format_str.format(
+                            str(ch_id).ljust(20),
+                            str(channel['capacity']).ljust(10),
+                            str(channel['local_balance']).ljust(10),
+                            str(round((Decimal(channel['local_balance'])/ \
+                                Decimal(channel['capacity']))*100, 2)).rjust(8),
+                            str(channel['forward_incoming'] + channel['forward_outgoing']).ljust(10).rjust(12),
+                            str(len(channel['pending_htlcs'])).ljust(15),
+                            time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
+                            )
+
+        click.echo(prnt_str)
     return
