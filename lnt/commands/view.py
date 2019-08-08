@@ -13,7 +13,7 @@ def channel(ctx):
     stub, macaroon = utils.create_stub(ctx)
 
     # ListChannels RPC call
-    request = ln.ListChannelsRequest(active_only=True)
+    request = ln.ListChannelsRequest(active_only=False)
     response = stub.ListChannels(request, metadata=[('macaroon', macaroon)])
     channels = utils.normalize_channels(response.channels)
 
