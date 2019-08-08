@@ -17,10 +17,6 @@ def channel(ctx):
     response = stub.ListChannels(request, metadata=[('macaroon', macaroon)])
     channels = utils.normalize_channels(response.channels)
 
-    monthsago = ctx.monthsago
-    if 'DefaultMonthsAgo' in ctx.find_root().config['LNT'].keys():
-        monthsago = ctx.find_root().config['LNT']['DefaultMonthsAgo']
-
     # GetChanInfo RPC call ( per channel )
     for ch_id in channels.keys():
         request = ln.ChanInfoRequest(chan_id=int(ch_id))
@@ -35,10 +31,10 @@ def channel(ctx):
 
     # ForwardingHistory RPC call
     fwd_hist_start_time = calendar.timegm((datetime.date.today() - \
-        datetime.timedelta(monthsago*365/12)).timetuple())
-    
+        datetime.timedelta(ctx.monthsago*365/12)).timetuple())
+
     fwd_hist_end_time = calendar.timegm(datetime.date.today().timetuple())
-    
+
     request = ln.ForwardingHistoryRequest(
         start_time=fwd_hist_start_time,
         end_time=fwd_hist_end_time,
