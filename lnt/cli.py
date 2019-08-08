@@ -14,11 +14,6 @@ class LntContext(object):
         self.config = {}
         self.verbose = False
 
-    # TODO: Better print implementation
-    # def __repr__(self):
-    #    return '<LntContext %r>' % self.home
-
-# pass_context = click.make_pass_decorator(LntContext)
 cmd_folder = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                           'commands'))
 
@@ -45,7 +40,6 @@ class ComplexCLI(click.MultiCommand):
         return mod.cli
 
 
-# @click.command(cls=ComplexCLI, context_settings=CONTEXT_SETTINGS)
 @click.group()
 @click.option('--config', metavar='CONFIG_PATH', type=click.Path(exists=True,
      file_okay=True, resolve_path=True, readable=True),
@@ -57,7 +51,6 @@ def main(ctx, config, verbose):
     and consumers
     """
     # TODO: Allow for custom lnt dir
-    # TODO: Set config to config_path in param
     config_path = config
 
 
