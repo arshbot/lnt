@@ -1,6 +1,6 @@
 import os, sys, click
 from configparser import ParsingError, ConfigParser
-from lnt.constants import DEFAULT_DIR_PATH
+from lnt.constants import DEFAULT_DIR_PATH, DEFAULT_MONTHS_AGO
 from lnt.utils import *
 from lnt.commands import create as cmd_create
 from lnt.commands import view as cmd_view
@@ -127,10 +127,19 @@ def view(ctx):
 @view.command()
 # TODO: Add channel row indexing
 # @click.option('--index', '-i', metavar='INDEX', help="Channel index to output")
+@click.option('--csv', is_flag=True, help="Channel index to output")
 @click.option('--monthsago', '-m', metavar='MONTHS_AGO', help="Shows events up to x months ago")
 @click.pass_context
-def channel(ctx, index, monthsago):
-    ctx.index = index
-    ctx.monthsago = int(monthsago)
+def channel(ctx, csv, monthsago):
+    ctx.csv = csv
+
+    if monthsago:
+        ctx.monthsago = monthsago
+    elif 'MonthsAgo' in ctx.find_root().config['LNT'].keys():
+        ctx.monthsago = ctx.find_root().config['LNT']['MonthsAgo']
+    else:
+        ctx.monthsago = DEFAULT_MONTHS_AGO
+    ctx.monthsago = int(ctx.monthsago)
+
     cmd_view.channel(ctx)
     return
