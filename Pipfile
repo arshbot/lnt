@@ -12,6 +12,8 @@ grpcio = "*"
 click = "*"
 PyInquirer = "*"
 googleapis-common-protos = "*"
+lnt = {path = ".",editable = true}
+ptpdb = "*"
 
 [requires]
 python_version = "3.7"
