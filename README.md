@@ -4,6 +4,8 @@ Lightning Network Tools (lnt) is a toolset for interacting and managing your [ln
 
 ## Installation
 
+Python 3 required.
+
 From source:
 
 ```
