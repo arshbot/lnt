@@ -121,10 +121,24 @@ def view(ctx):
 # TODO: Add channel row indexing
 # @click.option('--index', '-i', metavar='INDEX', help="Channel index to output")
 @click.option('--csv', is_flag=True, help="Channel index to output")
-@click.option('--monthsago', '-m', metavar='MONTHS_AGO', help="Shows events up to x months ago")
+@click.option('--monthsago', '-m', metavar='MONTHS_AGO',
+    help="Shows events up to x months ago")
+@click.option('--minlocalbalpercentage', '-mil', metavar='MIN_LOCAL_BAL_PERCENTAGE',
+    help="Shows channels whose local balance is at least x percentage", type=int)
+@click.option('--maxlocalbalpercentage', '-mal', metavar='MAX_LOCAL_BAL_PERCENTAGE',
+    help="Shows channels whose local balance is at most x percentage", type=int)
+@click.option('--minremotebalpercentage', '-mir', metavar='MIN_REMOTE_BAL_PERCENTAGE',
+    help="Shows channels whose remote balance is at least x percentage", type=int)
+@click.option('--maxremotebalpercentage', '-mar', metavar='MAX_REMOTE_BAL_PERCENTAGE',
+    help="Shows channels whose remote balance is at most x percentage", type=int)
 @click.pass_context
-def channel(ctx, csv, monthsago):
+def channel(ctx, csv, monthsago, minlocalbalpercentage, maxlocalbalpercentage,
+        minremotebalpercentage, maxremotebalpercentage):
     ctx.csv = csv
+    ctx.minlocalbalpercentage = minlocalbalpercentage
+    ctx.maxlocalbalpercentage = maxlocalbalpercentage
+    ctx.minremotebalpercentage = minremotebalpercentage
+    ctx.maxremotebalpercentage = maxremotebalpercentage
 
     if monthsago:
         ctx.monthsago = monthsago
@@ -133,6 +147,10 @@ def channel(ctx, csv, monthsago):
     else:
         ctx.monthsago = DEFAULT_MONTHS_AGO
     ctx.monthsago = int(ctx.monthsago)
+
+    # if minlocalbalpercentage and maxlocalbalpercentage:
+    #     if minlocalbalpercentage > maxlocalbalpercentage:
+    #         raise click.BadParameter(message="minlocalbalpercentage cannot be greater than maxlocalbalpercentage")
 
     cmd_view.channel(ctx)
     return

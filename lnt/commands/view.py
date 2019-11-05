@@ -18,15 +18,36 @@ def channel(ctx):
     channels = utils.normalize_channels(response.channels)
 
     # GetChanInfo RPC call ( per channel )
-    for ch_id in channels.keys():
+    for ch_id in list(channels):
         request = ln.ChanInfoRequest(chan_id=int(ch_id))
         response = stub.GetChanInfo(request, metadata=[('macaroon', macaroon)])
         chan_info = utils.normalize_get_chan_response(response)
         channels[ch_id] = { **channels[ch_id], **chan_info }
-        
+
         # Prep for ForwardHistory call
         channels[ch_id]['forward_incoming'] = 0
         channels[ch_id]['forward_outgoing'] = 0
+
+        # Apply rules
+        l_b = Decimal(channels[ch_id]['local_balance'])
+        r_b = Decimal(channels[ch_id]['remote_balance'])
+        cap = Decimal(channels[ch_id]['capacity'])
+
+        if ctx.minlocalbalpercentage and round((l_b/cap)*100, 2) < ctx.minlocalbalpercentage:
+            del channels[ch_id]
+            continue
+
+        if ctx.maxlocalbalpercentage and round((l_b/cap)*100, 2) > ctx.maxlocalbalpercentage:
+            del channels[ch_id]
+            continue
+
+        if ctx.minremotebalpercentage and round((r_b/cap)*100, 2) < ctx.minremotebalpercentage:
+            del channels[ch_id]
+            continue
+
+        if ctx.maxremotebalpercentage and round((r_b/cap)*100, 2) > ctx.maxremotebalpercentage:
+            del channels[ch_id]
+            continue
 
 
     # ForwardingHistory RPC call
