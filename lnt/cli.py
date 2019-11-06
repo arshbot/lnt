@@ -131,14 +131,21 @@ def view(ctx):
     help="Shows channels whose remote balance is at least x percentage", type=int)
 @click.option('--maxremotebalpercentage', '-mar', metavar='MAX_REMOTE_BAL_PERCENTAGE',
     help="Shows channels whose remote balance is at most x percentage", type=int)
+@click.option('--minchannelswithpeer', '-mip', metavar='MIN_CHANNELS_WITH_PEER',
+    help="Shows channels who have at least x total channels with peer", type=int)
+@click.option('--maxchannelswithpeer', '-map', metavar='MAX_CHANNELS_WITH_PEER',
+    help="Shows channels who have at most x total channels with peer", type=int)
 @click.pass_context
 def channel(ctx, csv, monthsago, minlocalbalpercentage, maxlocalbalpercentage,
-        minremotebalpercentage, maxremotebalpercentage):
+        minremotebalpercentage, maxremotebalpercentage, minchannelswithpeer,
+        maxchannelswithpeer):
     ctx.csv = csv
     ctx.minlocalbalpercentage = minlocalbalpercentage
     ctx.maxlocalbalpercentage = maxlocalbalpercentage
     ctx.minremotebalpercentage = minremotebalpercentage
     ctx.maxremotebalpercentage = maxremotebalpercentage
+    ctx.minchannelswithpeer = minchannelswithpeer
+    ctx.maxchannelswithpeer = maxchannelswithpeer
 
     if monthsago:
         ctx.monthsago = monthsago

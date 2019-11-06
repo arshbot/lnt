@@ -17,6 +17,8 @@ def channel(ctx):
     response = stub.ListChannels(request, metadata=[('macaroon', macaroon)])
     channels = utils.normalize_channels(response.channels)
 
+    num_channels_with_peer = {}
+
     # GetChanInfo RPC call ( per channel )
     for ch_id in list(channels):
         request = ln.ChanInfoRequest(chan_id=int(ch_id))
@@ -24,9 +26,13 @@ def channel(ctx):
         chan_info = utils.normalize_get_chan_response(response)
         channels[ch_id] = { **channels[ch_id], **chan_info }
 
+
         # Prep for ForwardHistory call
         channels[ch_id]['forward_incoming'] = 0
         channels[ch_id]['forward_outgoing'] = 0
+
+        # Count channels by peer
+        num_channels_with_peer[channels[ch_id]['remote_pubkey']] = num_channels_with_peer.get(channels[ch_id]['remote_pubkey'], 0) + 1
 
         # Apply rules
         l_b = Decimal(channels[ch_id]['local_balance'])
@@ -46,6 +52,14 @@ def channel(ctx):
             continue
 
         if ctx.maxremotebalpercentage and round((r_b/cap)*100, 2) > ctx.maxremotebalpercentage:
+            del channels[ch_id]
+            continue
+
+        if ctx.minchannelswithpeer and num_channels_with_peer[channels[ch_id]['remote_pubkey']] < ctx.minchannelswithpeer:
+            del channels[ch_id]
+            continue
+
+        if ctx.maxchannelswithpeer and num_channels_with_peer[channels[ch_id]['remote_pubkey']] > ctx.maxchannelswithpeer:
             del channels[ch_id]
             continue
 
@@ -81,9 +95,10 @@ def channel(ctx):
             "LOCAL/CAP   " + \
             "FORWARDS   " + \
             "PENDING HTLCS   " + \
-            "LAST USED"
+            "LAST USED".ljust(19) + \
+            "CHANNELS W/ PEER"
     else:
-        header = ",".join(["CHANNEL ID","CAPACITY","LOCAL_BAL","LOCAL/CAP","FORWARDS","PENDING HTLCS","LAST USED"])
+        header = ",".join(["CHANNEL ID","CAPACITY","LOCAL_BAL","LOCAL/CAP","FORWARDS","PENDING HTLCS","LAST USED","CHANNELS W/ PEER"])
 
     click.echo(header)
     for ch_id in channels.keys():
@@ -91,9 +106,9 @@ def channel(ctx):
 
         rows = []
 
-        format_str = "{} {} {} {}% {} {} {}"
+        format_str = "{} {} {} {}% {} {} {} {}"
         if ctx.csv:
-            format_str = "{},{},{},{}%,{},{},{}"
+            format_str = "{},{},{},{}%,{},{},{},{}"
 
         if ctx.csv:
             prnt_str = format_str.format(
@@ -105,6 +120,7 @@ def channel(ctx):
                             str(channel['forward_incoming'] + channel['forward_outgoing']),
                             str(len(channel['pending_htlcs'])),
                             time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
+                            str(num_channels_with_peer[channel['remote_pubkey']])
                             )
         else:
             prnt_str = format_str.format(
@@ -115,7 +131,8 @@ def channel(ctx):
                                 Decimal(channel['capacity']))*100, 2)).rjust(8),
                             str(channel['forward_incoming'] + channel['forward_outgoing']).ljust(10).rjust(12),
                             str(len(channel['pending_htlcs'])).ljust(15),
-                            time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
+                            str(time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update']))).ljust(18),
+                            str(num_channels_with_peer[channel['remote_pubkey']])
                             )
 
         click.echo(prnt_str)
