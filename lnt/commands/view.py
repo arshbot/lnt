@@ -3,29 +3,22 @@ import time, datetime, calendar
 from decimal import Decimal
 
 # Mark 3rd party lib imports
-import lnt.rpc.rpc_pb2 as ln, lnt.rpc.rpc_pb2_grpc as lnrpc
 import click, grpc
 
 # Mark Local imports
-from .utils import utils, rebal
+from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory
+
 
 def channel(ctx):
-    stub, macaroon = utils.create_stub(ctx)
-
     # ListChannels RPC call
-    request = ln.ListChannelsRequest(active_only=False)
-    response = stub.ListChannels(request, metadata=[('macaroon', macaroon)])
-    channels = utils.normalize_channels(response.channels)
+    channels = listChannels(ctx, active_only=False)
 
     num_channels_with_peer = {}
 
-    # GetChanInfo RPC call ( per channel )
+    # Per channel chores
     for ch_id in list(channels):
-        request = ln.ChanInfoRequest(chan_id=int(ch_id))
-        response = stub.GetChanInfo(request, metadata=[('macaroon', macaroon)])
-        chan_info = utils.normalize_get_chan_response(response)
+        chan_info = getChanInfo(ctx, chan_id=int(ch_id))
         channels[ch_id] = { **channels[ch_id], **chan_info }
-
 
         # Prep for ForwardHistory call
         channels[ch_id]['forward_incoming'] = 0
@@ -63,21 +56,13 @@ def channel(ctx):
             del channels[ch_id]
             continue
 
-
-    # ForwardingHistory RPC call
     fwd_hist_start_time = calendar.timegm((datetime.date.today() - \
         datetime.timedelta(ctx.monthsago*365/12)).timetuple())
 
     fwd_hist_end_time = calendar.timegm(datetime.date.today().timetuple())
 
-    request = ln.ForwardingHistoryRequest(
-        start_time=fwd_hist_start_time,
-        end_time=fwd_hist_end_time,
-        num_max_events=10000
-    )
-    response = stub.ForwardingHistory(request, metadata=[('macaroon', macaroon)])
-
-    for fwd_event in tuple(response.forwarding_events):
+    # ForwardingHistory RPC call
+    for fwd_event in getForwardingHistory(ctx, fwd_hist_start_time, fwd_hist_end_time):
         try:
             channels[str(fwd_event.chan_id_in)]['forward_incoming'] += 1
         except KeyError:

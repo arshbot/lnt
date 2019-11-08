@@ -4,6 +4,7 @@ from lnt.constants import DEFAULT_DIR_PATH, DEFAULT_MONTHS_AGO
 from lnt.utils import *
 from lnt.commands import create as cmd_create
 from lnt.commands import view as cmd_view
+from lnt.commands.utils import utils
 
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix='COMPLEX')
@@ -146,6 +147,8 @@ def channel(ctx, csv, monthsago, minlocalbalpercentage, maxlocalbalpercentage,
     ctx.maxremotebalpercentage = maxremotebalpercentage
     ctx.minchannelswithpeer = minchannelswithpeer
     ctx.maxchannelswithpeer = maxchannelswithpeer
+
+    ctx.stub, ctx.macaroon = utils.create_stub(ctx)
 
     if monthsago:
         ctx.monthsago = monthsago
