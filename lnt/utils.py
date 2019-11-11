@@ -37,7 +37,13 @@ def validate_config(config):
         passed = False
         raise click.ClickException("Required parameter 'Host' not found in conf")
 
+    if 'testnet' in config['LNT']:
+        try:
+            config['LNT']['testnet'] = bool(config['LNT']['testnet'])
+        except Exception:
+            click.ClickException("testnet has to bool")
+
     if not passed:
        raise click.ClickException("Provided config file failed validation")
 
-    return passed
+    return config, passed

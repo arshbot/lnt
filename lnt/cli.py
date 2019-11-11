@@ -75,8 +75,12 @@ def main(ctx, config, verbose):
     # Config validation
     try:
         config.read(config_path)
-        validate_config(config)
-    except ParsingError:
+        config, passed = validate_config(config)
+
+        if not passed:
+            raise Exception
+
+    except Exception:
         raise Exception("Invalid config file provided")
 
     ctx.config = config
