@@ -5,7 +5,7 @@ import os, codecs, argparse
 # Mark 3rd party lib imports
 import lnt.rpc.rpc_pb2 as ln, lnt.rpc.rpc_pb2_grpc as lnrpc
 from PyInquirer import style_from_dict, Token, prompt, Separator
-import click, grpc
+import click
 
 # Mark Local imports
 from .utils import utils, rebal

@@ -3,7 +3,7 @@ import time, datetime, calendar
 from decimal import Decimal
 
 # Mark 3rd party lib imports
-import click, grpc
+import click
 
 # Mark Local imports
 from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory

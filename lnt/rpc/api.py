@@ -1,4 +1,5 @@
 # Mark 3rd party lib imports
+import click
 import lnt.rpc.rpc_pb2 as ln, lnt.rpc.rpc_pb2_grpc as lnrpc
 
 # Mark local imports
