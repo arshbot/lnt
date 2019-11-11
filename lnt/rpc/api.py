@@ -28,4 +28,28 @@ def getForwardingHistory(ctx, start_time, end_time, num_max_events=10000):
 
     return tuple(response.forwarding_events)
 
+def closeChannel(ctx, channel_point, streaming:bool, force:bool=False, target_conf:int=None, sat_per_byte:int=None):
+    testnet = ctx.parent.parent.config['LNT']['testnet']
 
+    request = ln.CloseChannelRequest(
+        channel_point=channel_point,
+        force=force,
+        target_conf=target_conf,
+        sat_per_byte=sat_per_byte,
+    )
+
+    for response in ctx.stub.CloseChannel(request, metadata=[('macaroon', ctx.macaroon)]):
+        if streaming:
+            if response.close_pending:
+                tx = response.close_pending.txid[::-1].hex()
+                click.echo(
+                "Closing Tx Confirming: {}\nView it here: https://blockstream.info{}{}"\
+                    .format(tx, '/testnet/' if testnet else '/', tx))
+            elif response.chan_close:
+                tx = response.chan_close.txid[::-1].hex()
+                click.echo(
+                "Closing Tx Confirmed: {}\nView it here: https://blockstream.info{}{}"\
+                    .format(tx, '/testnet/' if testnet else '/', tx))
+                break
+        else:
+            return response.close_pending.txid[::-1].hex()
