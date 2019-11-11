@@ -1,9 +1,12 @@
 import os, sys, click
+from decimal import Decimal
 from configparser import ParsingError, ConfigParser
 from lnt.constants import DEFAULT_DIR_PATH, DEFAULT_MONTHS_AGO
 from lnt.utils import *
 from lnt.commands import create as cmd_create
 from lnt.commands import view as cmd_view
+from lnt.commands import kill as cmd_kill
+from lnt.commands.utils import utils
 
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix='COMPLEX')
@@ -72,8 +75,12 @@ def main(ctx, config, verbose):
     # Config validation
     try:
         config.read(config_path)
-        validate_config(config)
-    except ParsingError:
+        config, passed = validate_config(config)
+
+        if not passed:
+            raise Exception
+
+    except Exception:
         raise Exception("Invalid config file provided")
 
     ctx.config = config
@@ -147,6 +154,8 @@ def channel(ctx, csv, monthsago, minlocalbalpercentage, maxlocalbalpercentage,
     ctx.minchannelswithpeer = minchannelswithpeer
     ctx.maxchannelswithpeer = maxchannelswithpeer
 
+    ctx.stub, ctx.macaroon = utils.create_stub(ctx)
+
     if monthsago:
         ctx.monthsago = monthsago
     elif 'MonthsAgo' in ctx.find_root().config['LNT'].keys():
@@ -161,3 +170,27 @@ def channel(ctx, csv, monthsago, minlocalbalpercentage, maxlocalbalpercentage,
 
     cmd_view.channel(ctx)
     return
+
+@main.group()
+@click.pass_context
+def kill(ctx):
+    """ Kill channels """
+    return
+
+@kill.command()
+@click.option('--id', metavar='CHANNEL_ID', help="Close by channel id", type=int)
+@click.option('-f', is_flag=True, help="Closes a channel uncooperatively ( force close )")
+@click.option('--streaming', '-s', is_flag=True, help="Listens for updates on the closed channel")
+@click.option('--target_conf', metavar='NUM_BLOCKS', help="Target confirmation blocks", type=int)
+@click.option('--sat_per_byte', metavar='SATS', help="Feerate in satoshis per byte for closing tx", type=Decimal)
+@click.pass_context
+def channel(ctx, id, f, streaming, target_conf, sat_per_byte):
+    ctx.channel_id = id
+    ctx.force = f
+    ctx.streaming = streaming
+    ctx.target_conf = target_conf
+    ctx.sat_per_byte = sat_per_byte
+    ctx.stub, ctx.macaroon = utils.create_stub(ctx)
+
+    cmd_kill.channel(ctx)
+
