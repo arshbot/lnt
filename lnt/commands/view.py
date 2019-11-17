@@ -34,37 +34,57 @@ def channel(ctx):
         except KeyError:
             pass
 
-    if not ctx.csv:
-        header = "\n" + \
-            "CHANNEL ID".ljust(21) + \
-            "CAPACITY".ljust(11) + \
-            "LOCAL_BAL".ljust(11) + \
-            "LOCAL/CAP   " + \
-            "FORWARDS   " + \
-            "PENDING HTLCS   " + \
-            "LAST USED".ljust(19) + \
-            "CHANNELS W/ PEER"
+    # Per channel chores
+    for ch_id in list(channels):
+        chan_info = getChanInfo(ctx, chan_id=int(ch_id))
+        channels[ch_id] = { **channels[ch_id], **chan_info }
+
+        # Prep for ForwardHistory call
+        channels[ch_id]['forward_incoming'] = 0
+        channels[ch_id]['forward_outgoing'] = 0
+        channels[ch_id]['forwards'] = channels[ch_id]['forward_incoming'] + channels[ch_id]['forward_outgoing']
+        channels[ch_id]['local/cap'] = round((Decimal(channels[ch_id]['local_balance'])/ Decimal(channels[ch_id]['capacity']))*100, 2)
+
+        # Count channels by peer
+        num_channels_with_peer[channels[ch_id]['remote_pubkey']] = num_channels_with_peer.get(channels[ch_id]['remote_pubkey'], 0) + 1
+    
+    # Sort the things
+    if ctx.sort:
+        sort_key = VIEW_CHANNEL_COLUMNS_MAP[(ctx.max or ctx.min).upper()]
+        sorted_channels = sorted(channels.items(), key=lambda kv: kv[1][sort_key])
+
+    if ctx.max:
+        sorted_channels.reverse()
+
+    if ctx.csv:
+        header = ",".join(VIEW_CHANNEL_COLUMNS_DEFAULT)
     else:
-        header = ",".join(["CHANNEL ID","CAPACITY","LOCAL_BAL","LOCAL/CAP","FORWARDS","PENDING HTLCS","LAST USED","CHANNELS W/ PEER"])
+        header = "\n" + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[0].ljust(21) + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[1].ljust(11) + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[2].ljust(11) + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[3] + "   " + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[4] + "   " + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[5] + "   " + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[6].ljust(19) + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[7]
 
     click.echo(header)
-    for ch_id in channels.keys():
+
+    array = sorted_channels if ctx.sort else channels.keys()
+    for value in array:
+        ch_id = value[0] if ctx.sort else value
         channel = channels[ch_id]
-
         rows = []
-
-        format_str = "{} {} {} {}% {} {} {} {}"
-        if ctx.csv:
-            format_str = "{},{},{},{}%,{},{},{},{}"
+        format_str = "{},{},{},{}%,{},{},{},{}" if ctx.csv else "{} {} {} {}% {} {} {} {}"
 
         if ctx.csv:
             prnt_str = format_str.format(
                             str(ch_id),
                             str(channel['capacity']),
                             str(channel['local_balance']),
-                            str(round((Decimal(channel['local_balance'])/ \
-                                Decimal(channel['capacity']))*100, 2)),
-                            str(channel['forward_incoming'] + channel['forward_outgoing']),
+                            str(channel['local/cap']),
+                            str(channel['forwards']),
                             str(len(channel['pending_htlcs'])),
                             time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
                             str(num_channels_with_peer[channel['remote_pubkey']])
@@ -74,9 +94,8 @@ def channel(ctx):
                             str(ch_id).ljust(20),
                             str(channel['capacity']).ljust(10),
                             str(channel['local_balance']).ljust(10),
-                            str(round((Decimal(channel['local_balance'])/ \
-                                Decimal(channel['capacity']))*100, 2)).rjust(8),
-                            str(channel['forward_incoming'] + channel['forward_outgoing']).ljust(10).rjust(12),
+                            str(channel['local/cap']).rjust(8),
+                            str(channel['forwards']).ljust(10).rjust(12),
                             str(len(channel['pending_htlcs'])).ljust(15),
                             str(time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update']))).ljust(18),
                             str(num_channels_with_peer[channel['remote_pubkey']])
