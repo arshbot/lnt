@@ -16,9 +16,6 @@ def channel(ctx):
 
     num_channels_with_peer = {}
 
-    from ptpdb import set_trace
-    # set_trace()
-
     fwd_hist_start_time = calendar.timegm((datetime.date.today() - \
         datetime.timedelta(ctx.monthsago*365/12)).timetuple())
 
