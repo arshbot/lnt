@@ -64,13 +64,14 @@ def channel(ctx):
     else:
         header = "\n" + \
             VIEW_CHANNEL_COLUMNS_DEFAULT[0].ljust(21) + \
-            VIEW_CHANNEL_COLUMNS_DEFAULT[1].ljust(11) + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[1].ljust(12) + \
             VIEW_CHANNEL_COLUMNS_DEFAULT[2].ljust(11) + \
             VIEW_CHANNEL_COLUMNS_DEFAULT[3] + "   " + \
             VIEW_CHANNEL_COLUMNS_DEFAULT[4] + "   " + \
             VIEW_CHANNEL_COLUMNS_DEFAULT[5] + "   " + \
             VIEW_CHANNEL_COLUMNS_DEFAULT[6].ljust(19) + \
-            VIEW_CHANNEL_COLUMNS_DEFAULT[7]
+            VIEW_CHANNEL_COLUMNS_DEFAULT[7].ljust(19) + \
+            VIEW_CHANNEL_COLUMNS_DEFAULT[8]
 
     click.echo(header)
 
@@ -79,7 +80,7 @@ def channel(ctx):
         ch_id = value[0] if ctx.sort else value
         channel = channels[ch_id]
         rows = []
-        format_str = "{},{},{},{}%,{},{},{},{}" if ctx.csv else "{} {} {} {}% {} {} {} {}"
+        format_str = "{},{},{},{}%,{},{},{},{},{}" if ctx.csv else "{} {} {} {}% {} {} {} {} {}"
 
         if ctx.csv:
             prnt_str = format_str.format(
@@ -90,18 +91,20 @@ def channel(ctx):
                             str(channel['forwards']),
                             str(len(channel['pending_htlcs'])),
                             time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
-                            str(num_channels_with_peer[channel['remote_pubkey']])
+                            str(num_channels_with_peer[channel['remote_pubkey']]),
+                            str(channel.get('alias', ''))
                             )
         else:
             prnt_str = format_str.format(
                             str(ch_id).ljust(20),
-                            str(channel['capacity']).ljust(10),
+                            str(channel['capacity']).ljust(11),
                             str(channel['local_balance']).ljust(10),
                             str(channel['local/cap']).rjust(8),
                             str(channel['forwards']).ljust(10).rjust(12),
                             str(len(channel['pending_htlcs'])).ljust(15),
                             str(time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update']))).ljust(18),
-                            str(num_channels_with_peer[channel['remote_pubkey']])
+                            str(num_channels_with_peer[channel['remote_pubkey']]).ljust(18),
+                            str(channel.get('alias', ''))
                             )
 
         click.echo(prnt_str)
