@@ -1,4 +1,4 @@
-import os, grpc, codecs
+import os, grpc, codecs, requests
 import lnt.rpc.rpc_pb2 as ln, lnt.rpc.rpc_pb2_grpc as lnrpc
 
 def create_stub(ctx):
@@ -56,3 +56,7 @@ def normalize_get_chan_response(chaninfo):
         }
     }
     return chaninfo_d
+
+def get_1ml_info(testnet:bool, pub_key):
+    resp = requests.get("https://1ml.com{}/node/{}/json".format('/testnet' if testnet else '', pub_key))
+    return resp.json() if resp.status_code == 200 else {}
