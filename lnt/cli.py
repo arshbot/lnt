@@ -142,10 +142,10 @@ def channel(ctx, csv, monthsago, max, min):
 
     if ctx.max or ctx.min:
         if ctx.min and ctx.min.lower() in ['num_channels_with_peer', 'last_update', 'pending_htlcs',\
-             'channel_id']:
+             'channel_id', 'alias']:
             raise click.BadParameter('Sorting for these COLUMNS are not implemented yet.')
         if ctx.max and ctx.max.lower() in ['num_channels_with_peer', 'last_update', 'pending_htlcs',\
-             'channel_id']:
+             'channel_id', 'alias']:
             raise click.BadParameter('Sorting for these COLUMNS are not implemented yet.')
 
         ctx.sort = True
