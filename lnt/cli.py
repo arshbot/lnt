@@ -7,6 +7,7 @@ from lnt.commands import create as cmd_create
 from lnt.commands import view as cmd_view
 from lnt.commands import kill as cmd_kill
 from lnt.commands.utils import utils
+from lnt import validators
 
 
 CONTEXT_SETTINGS = dict(auto_envvar_prefix='COMPLEX')
@@ -130,29 +131,27 @@ def view(ctx):
 @click.option('--csv', is_flag=True, help="Channel index to output")
 @click.option('--monthsago', '-m', metavar='MONTHS_AGO',
     help="Shows events up to x months ago")
-@click.option('--minlocalbalpercentage', '-mil', metavar='MIN_LOCAL_BAL_PERCENTAGE',
-    help="Shows channels whose local balance is at least x percentage", type=int)
-@click.option('--maxlocalbalpercentage', '-mal', metavar='MAX_LOCAL_BAL_PERCENTAGE',
-    help="Shows channels whose local balance is at most x percentage", type=int)
-@click.option('--minremotebalpercentage', '-mir', metavar='MIN_REMOTE_BAL_PERCENTAGE',
-    help="Shows channels whose remote balance is at least x percentage", type=int)
-@click.option('--maxremotebalpercentage', '-mar', metavar='MAX_REMOTE_BAL_PERCENTAGE',
-    help="Shows channels whose remote balance is at most x percentage", type=int)
-@click.option('--minchannelswithpeer', '-mip', metavar='MIN_CHANNELS_WITH_PEER',
-    help="Shows channels who have at least x total channels with peer", type=int)
-@click.option('--maxchannelswithpeer', '-map', metavar='MAX_CHANNELS_WITH_PEER',
-    help="Shows channels who have at most x total channels with peer", type=int)
+@click.option('--max', metavar='COLUMN', help="Sorts COLUMN by max", callback=validators.columns)
+@click.option('--min', metavar='COLUMN', help="Sorts COLUMN by min", callback=validators.columns)
 @click.pass_context
-def channel(ctx, csv, monthsago, minlocalbalpercentage, maxlocalbalpercentage,
-        minremotebalpercentage, maxremotebalpercentage, minchannelswithpeer,
-        maxchannelswithpeer):
+def channel(ctx, csv, monthsago, max, min):
+    ctx.sort = None
     ctx.csv = csv
-    ctx.minlocalbalpercentage = minlocalbalpercentage
-    ctx.maxlocalbalpercentage = maxlocalbalpercentage
-    ctx.minremotebalpercentage = minremotebalpercentage
-    ctx.maxremotebalpercentage = maxremotebalpercentage
-    ctx.minchannelswithpeer = minchannelswithpeer
-    ctx.maxchannelswithpeer = maxchannelswithpeer
+    ctx.max = max
+    ctx.min = min
+
+    if ctx.max or ctx.min:
+        if ctx.min and ctx.min.lower() in ['num_channels_with_peer', 'last_update', 'pending_htlcs',\
+             'channel_id']:
+            raise click.BadParameter('Sorting for these COLUMNS are not implemented yet.')
+        if ctx.max and ctx.max.lower() in ['num_channels_with_peer', 'last_update', 'pending_htlcs',\
+             'channel_id']:
+            raise click.BadParameter('Sorting for these COLUMNS are not implemented yet.')
+
+        ctx.sort = True
+
+    if ctx.max and ctx.min:
+        raise click.BadParameter("max and min options are mutually exclusive.")
 
     ctx.stub, ctx.macaroon = utils.create_stub(ctx)
 
@@ -163,10 +162,6 @@ def channel(ctx, csv, monthsago, minlocalbalpercentage, maxlocalbalpercentage,
     else:
         ctx.monthsago = DEFAULT_MONTHS_AGO
     ctx.monthsago = int(ctx.monthsago)
-
-    # if minlocalbalpercentage and maxlocalbalpercentage:
-    #     if minlocalbalpercentage > maxlocalbalpercentage:
-    #         raise click.BadParameter(message="minlocalbalpercentage cannot be greater than maxlocalbalpercentage")
 
     cmd_view.channel(ctx)
     return
