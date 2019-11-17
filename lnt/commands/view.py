@@ -15,46 +15,8 @@ def channel(ctx):
 
     num_channels_with_peer = {}
 
-    # Per channel chores
-    for ch_id in list(channels):
-        chan_info = getChanInfo(ctx, chan_id=int(ch_id))
-        channels[ch_id] = { **channels[ch_id], **chan_info }
-
-        # Prep for ForwardHistory call
-        channels[ch_id]['forward_incoming'] = 0
-        channels[ch_id]['forward_outgoing'] = 0
-
-        # Count channels by peer
-        num_channels_with_peer[channels[ch_id]['remote_pubkey']] = num_channels_with_peer.get(channels[ch_id]['remote_pubkey'], 0) + 1
-
-        # Apply rules
-        l_b = Decimal(channels[ch_id]['local_balance'])
-        r_b = Decimal(channels[ch_id]['remote_balance'])
-        cap = Decimal(channels[ch_id]['capacity'])
-
-        if ctx.minlocalbalpercentage and round((l_b/cap)*100, 2) < ctx.minlocalbalpercentage:
-            del channels[ch_id]
-            continue
-
-        if ctx.maxlocalbalpercentage and round((l_b/cap)*100, 2) > ctx.maxlocalbalpercentage:
-            del channels[ch_id]
-            continue
-
-        if ctx.minremotebalpercentage and round((r_b/cap)*100, 2) < ctx.minremotebalpercentage:
-            del channels[ch_id]
-            continue
-
-        if ctx.maxremotebalpercentage and round((r_b/cap)*100, 2) > ctx.maxremotebalpercentage:
-            del channels[ch_id]
-            continue
-
-        if ctx.minchannelswithpeer and num_channels_with_peer[channels[ch_id]['remote_pubkey']] < ctx.minchannelswithpeer:
-            del channels[ch_id]
-            continue
-
-        if ctx.maxchannelswithpeer and num_channels_with_peer[channels[ch_id]['remote_pubkey']] > ctx.maxchannelswithpeer:
-            del channels[ch_id]
-            continue
+    from ptpdb import set_trace
+    # set_trace()
 
     fwd_hist_start_time = calendar.timegm((datetime.date.today() - \
         datetime.timedelta(ctx.monthsago*365/12)).timetuple())
