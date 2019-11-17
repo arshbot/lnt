@@ -7,6 +7,7 @@ import click
 
 # Mark Local imports
 from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory
+from lnt.constants import VIEW_CHANNEL_COLUMNS_DEFAULT, VIEW_CHANNEL_COLUMNS_MAP
 
 
 def channel(ctx):
