@@ -8,7 +8,7 @@ from .utils import utils
 
 
 def channel(ctx):
-    testnet = ctx.parent.parent.config['LNT']['testnet']
+    testnet = ctx.parent.parent.config['LNT'].get('testnet', False)
     chan_info = getChanInfo(ctx, ctx.channel_id)
     funding_txid, output_index = chan_info['chan_point'].split(':')
 

@@ -12,7 +12,7 @@ from lnt.commands.utils.utils import get_1ml_info
 
 
 def channel(ctx):
-    testnet = ctx.parent.parent.config['LNT']['testnet']
+    testnet = ctx.parent.parent.config['LNT'].get('testnet', False)
 
     # ListChannels RPC call
     channels = listChannels(ctx, active_only=False)
@@ -39,6 +39,8 @@ def channel(ctx):
     for ch_id in list(channels):
         chan_info = getChanInfo(ctx, chan_id=int(ch_id))
         ml_info = get_1ml_info(testnet, channels[ch_id]['remote_pubkey'])
+
+        # TODO: capacity seems to get weird here
         channels[ch_id] = { **channels[ch_id], **chan_info, **ml_info }
 
 
