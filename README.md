@@ -4,7 +4,7 @@ Lightning Network Tools (lnt) is a toolset for interacting and managing your [ln
 
 ## Installation
 
-Python 3 required.
+Python 3.6 required
 
 From source:
 
@@ -16,42 +16,57 @@ python setup.py install
 
 From Pypi: 
 
-( googleapis-common-protos must be installed seperately due to a [bug](https://github.com/pypa/pipenv/issues/3886) in pipenv
-
 ```
-pip3 install lnt, googleapis-common-protos
+pip3 install lnt
 ```
 
 ## Feature progress
 
 - [x] View channels
-- [ ] forwarding events input into View Channel output
+- [x] Forwarding events input into view channel output
+- [x] Add alias info to view channel output
+- [x] Add sorting options to view channel output
+- [x] Kill channel
+- [ ] Kill zombie channels
 - [ ] View invoices
-- [ ] View rebalances
 - [ ] View payments
+- [ ] View payments by last node in hop
 - [ ] Create channel
 - [ ] Create invoice
-- [x] Create rebalance image
-- [ ] Execute rebalance image
 - [ ] Send payment
 
 ## Usage
 
-View channels
+View channels with sorting options
 
 ```
-$ lnt view channel
+$ lnt view channel --max local/cap  
 
-CHANNEL ID           CAPACITY   LOCAL_BAL  LOCAL/CAP   UPDATE NUM   PENDING HTLCS   LAST USED
-1724858866081988609  15000000   14999817     100.00%           23   0               2019-08-05 17:03
-1598452412275752960  16777215   351919         2.10%          460   0               2019-08-05 17:19
-1635240971829051392  16777215   1055656        6.29%          271   0               2019-08-05 08:31
-1724681844702183425  3700000    1859791       50.26%           20   0               2019-07-11 19:33
-1722901735378124801  2000000    1868996       93.45%           54   0               2019-07-01 15:00
-1728227769702547457  2500000    2499817       99.99%            0   0               2019-08-04 23:42
-1664184515930226688  1000000    0              0.00%          102   0               2019-08-05 18:08
-1626448177341202433  2000000    1656571       82.83%          577   0               2019-08-04 21:34
-1600103878740869120  16777215   221046         1.32%         1795   0               2019-08-05 08:00
+CHANNEL_ID           CAPACITY    LOCAL_BAL  LOCAL/CAP   FORWARDS   PENDING_HTLCS   LAST_USED          CHANNELS_W/_PEER   ALIAS
+1631776410691960832  10000000    7419528       74.20%   0          0               2019-11-19 19:25   1                  
+1715412961679638528  6211145     2387442       38.44%   0          0               2019-11-12 13:57   1                  
+1732367430983155712  3000000     879679        29.32%   0          0               2019-08-23 20:39   1                  023a0c37a419776aca94
+1767994906258309120  2087056925  1684500        0.08%   0          0               2019-11-21 05:04   1                  0270685ca81a8e4d4d01
+1663766701515276289  30915126    0              0.00%   0          0               2019-04-29 14:00   1                  BakimonoLND
+1741923286541336577  1761156214  51588          0.00%   0          0               2019-11-18 17:19   1                  WagOne
+1733044730145341441  1000000     0              0.00%   0          0               2019-08-28 04:33   1                  03ade33d362ecb7a62bdd
+1767997105277960193  18239461648 0              0.00%   0          0               2019-11-21 08:51   1                  aranguren.org
+1742018944049741825  14401836    0              0.00%   0          0               2019-11-19 02:15   1                  CALL_OF_KTULU [LND]
+1601870793929588736  25838893    0              0.00%   0          0               2019-02-23 18:34   1                  LN Testnet node
+1709436016472031232  718165815   0              0.00%   0          0               2019-07-03 00:50   1                  Fireduck test
+1736929304724045825  5000000     0              0.00%   0          0               2019-11-12 13:57   1                  
+1601807022252032001  16777215    0              0.00%   0          0               2019-11-12 13:57   1                  
+1660159203848814593  47740049    0              0.00%   0          0               2019-08-11 15:04   1                  MOONLAMBO
+1631303620691951617  5100421     0              0.00%   0          0               2019-03-06 14:33   1                  SNONAS  
+```
+
+Kill channel by channel id ( force close )
+
+```
+$ lnt kill channel --id 1601807022252032001 -f
+
+Closing Tx Confirming: 8cd225cac4871085580223cfc92b3b4658964d19b60075f3cfef4169e46f1759
+View it here: https://blockstream.info/testnet/8cd225cac4871085580223cfc92b3b4658964d19b60075f3cfef4169e46f1759
 ```
 
 ## Config
@@ -66,7 +81,7 @@ TlsCert = /home/arshbot/Projects/kubefiles/staging/tls.cert
 Host = localhost:10009
 
 [LNT]
-# LND specific options to come soon!
+Testnet = True
 ```
 
 
