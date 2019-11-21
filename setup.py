@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='lnt',
-    version='0.2.2',
+    version='0.3.0',
     author="arshbot",
     author_email="harshagoli@gmail.com",
     include_package_data=True,
