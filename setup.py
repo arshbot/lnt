@@ -18,6 +18,8 @@ setup(
         'grpcio-tools',
         'grpcio',
         'PyInquirer',
+        'googleapis-common-protos',
+        'requests'
     ],
     entry_points='''
         [console_scripts]
