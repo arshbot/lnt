@@ -15,6 +15,7 @@ googleapis-common-protos = "*"
 lnt = {path = ".",editable = true}
 ptpdb = "*"
 requests = "*"
+asyncio = "*"
 
 [requires]
 python_version = "3.6"

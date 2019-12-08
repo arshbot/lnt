@@ -1,6 +1,7 @@
 # Mark standard lib imports
 import time, datetime, calendar
 from decimal import Decimal
+import asyncio
 
 # Mark 3rd party lib imports
 import click
@@ -10,8 +11,10 @@ from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory
 from lnt.constants import VIEW_CHANNEL_COLUMNS_DEFAULT, VIEW_CHANNEL_COLUMNS_MAP
 from lnt.commands.utils.utils import get_1ml_info
 
+loop = asyncio.get_event_loop()
 
 def channel(ctx):
+    start = time.time()
     testnet = ctx.parent.parent.config['LNT'].get('testnet', False)
 
     # ListChannels RPC call
@@ -36,15 +39,11 @@ def channel(ctx):
             pass
 
     # Per channel chores
-    for ch_id in list(channels):
+    async def get_chan_info_chores(ch_id):
         chan_info = getChanInfo(ctx, chan_id=int(ch_id))
-        ml_info = get_1ml_info(testnet, channels[ch_id]['remote_pubkey'])
 
-        # TODO: capacity seems to get weird here
-        channels[ch_id] = { **channels[ch_id], **chan_info, **ml_info }
+        channels[ch_id] = { **channels[ch_id], **chan_info }
 
-
-        # Prep for ForwardHistory call
         channels[ch_id]['forward_incoming'] = 0
         channels[ch_id]['forward_outgoing'] = 0
         channels[ch_id]['forwards'] = channels[ch_id]['forward_incoming'] + channels[ch_id]['forward_outgoing']
@@ -52,6 +51,21 @@ def channel(ctx):
 
         # Count channels by peer
         num_channels_with_peer[channels[ch_id]['remote_pubkey']] = num_channels_with_peer.get(channels[ch_id]['remote_pubkey'], 0) + 1
+
+    async def get_1ml_info_chores(ch_id):
+        ml_info = get_1ml_info(testnet, channels[ch_id]['remote_pubkey'])
+
+        if ml_info.get('capacity'):
+            del ml_info['capacity'] # trust node capacity over 1ml
+
+        channels[ch_id] = { **channels[ch_id], **ml_info }
+
+    async_tasks = []
+    for ch_id in list(channels):
+       async_tasks.append(loop.create_task(get_chan_info_chores(ch_id)))
+       async_tasks.append(loop.create_task(get_1ml_info_chores(ch_id)))
+    
+    loop.run_until_complete(asyncio.gather(*async_tasks))
     
     # Sort the things
     if ctx.sort:
@@ -110,4 +124,7 @@ def channel(ctx):
                             )
 
         click.echo(prnt_str)
+        
+    end = time.time()
+    click.echo(end - start)
     return
