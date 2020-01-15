@@ -20,6 +20,10 @@ From Pypi:
 pip3 install lnt
 ```
 
+### Config setup
+
+lnt expects an admin macaroon and tls cert in the default **testnet** LND path locations. If your LND dirs are different, or you want to use this against mainnet, take a look at the config section below.
+
 ## Feature progress
 
 - [x] View channels
@@ -72,6 +76,8 @@ View it here: https://blockstream.info/testnet/8cd225cac4871085580223cfc92b3b465
 ## Config
 
 lnt expects an `lnt` folder in your `~/` directory for config and storage purposes. If it does not find one, it will create it.
+
+**Mainnet Usage:** If you have LND installed in the standard way, simply replace `testnet` in the default path with `mainnet`. If your LND installation is a bit custom, replace the `MacaroonPath` and `TlsCert` as needed. Be sure to set [LNT] Testnet to `False`.
 
 An example conf file:
 ```
