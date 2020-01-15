@@ -23,14 +23,11 @@ VIEW_CHANNEL_COLUMNS_TOTAL = VIEW_CHANNEL_COLUMNS_DEFAULT + VIEW_CHANNEL_COLUMNS
 
 DEFAULT_MONTHS_AGO = 3
 
-EMPTY_CONF ="""
+EMPTY_CONF = """
 [LND]
-# Replace the below values with your respective files for your
-# lnd node
-
-# MacaroonPath = ~/admin.macaroon
-# TlsCert = ~/tls.cert
-# Host = localhost:10009
+MacaroonPath = ~/.lnd/data/chain/bitcoin/testnet/admin.macaroon
+TlsCert = ~/.lnd/tls.cert
+Host = localhost:10009
 
 [LNT]
 """
