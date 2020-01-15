@@ -30,4 +30,5 @@ TlsCert = ~/.lnd/tls.cert
 Host = localhost:10009
 
 [LNT]
+Testnet = True
 """
