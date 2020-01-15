@@ -12,10 +12,14 @@ from lnt.commands.utils.utils import get_1ml_info
 
 
 def channel(ctx):
+    start = time.time()
     testnet = ctx.parent.parent.config['LNT'].get('testnet', False)
 
+    chan_start = time.time()
     # ListChannels RPC call
     channels = listChannels(ctx, active_only=False)
+    chan_end = time.time()
+    print('Channel: ' + str(chan_end - chan_start))
 
     num_channels_with_peer = {}
 
@@ -24,6 +28,7 @@ def channel(ctx):
 
     fwd_hist_end_time = calendar.timegm(datetime.date.today().timetuple())
 
+    forward_start = time.time()
     # ForwardingHistory RPC call
     for fwd_event in getForwardingHistory(ctx, fwd_hist_start_time, fwd_hist_end_time):
         try:
@@ -34,14 +39,17 @@ def channel(ctx):
             channels[str(fwd_event.chan_id_out)]['forward_outgoing'] += 1
         except KeyError:
             pass
+    forward_end = time.time()
+    print('Forwards: ' + str(forward_end - forward_start))
 
+    chore_start = time.time()
     # Per channel chores
     for ch_id in list(channels):
         chan_info = getChanInfo(ctx, chan_id=int(ch_id))
-        ml_info = get_1ml_info(testnet, channels[ch_id]['remote_pubkey'])
+        # ml_info = get_1ml_info(testnet, channels[ch_id]['remote_pubkey'])
 
         # TODO: capacity seems to get weird here
-        channels[ch_id] = { **channels[ch_id], **chan_info, **ml_info }
+        channels[ch_id] = { **channels[ch_id], **chan_info } # , **ml_info }
 
 
         # Prep for ForwardHistory call
@@ -52,7 +60,9 @@ def channel(ctx):
 
         # Count channels by peer
         num_channels_with_peer[channels[ch_id]['remote_pubkey']] = num_channels_with_peer.get(channels[ch_id]['remote_pubkey'], 0) + 1
-    
+    chore_end = time.time()
+    print('Chores: ' + str(chore_end - chore_start))
+
     # Sort the things
     if ctx.sort:
         sort_key = VIEW_CHANNEL_COLUMNS_MAP[(ctx.max or ctx.min).upper()]
@@ -110,4 +120,7 @@ def channel(ctx):
                             )
 
         click.echo(prnt_str)
+    end = time.time()
+    print('Printing ' + str(end - chore_end))
+    print('Final: ' + str(end - start))
     return
