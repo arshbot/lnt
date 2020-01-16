@@ -6,10 +6,9 @@ from decimal import Decimal
 import click
 
 # Mark Local imports
-from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory
+from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory, getNodeInfo
 from lnt.constants import VIEW_CHANNEL_COLUMNS_DEFAULT, VIEW_CHANNEL_COLUMNS_MAP
 from lnt.commands.utils.utils import get_1ml_info
-
 
 def channel(ctx):
     testnet = ctx.parent.parent.config['LNT'].get('testnet', False)
@@ -52,7 +51,7 @@ def channel(ctx):
 
         # Count channels by peer
         num_channels_with_peer[channels[ch_id]['remote_pubkey']] = num_channels_with_peer.get(channels[ch_id]['remote_pubkey'], 0) + 1
-    
+
     # Sort the things
     if ctx.sort:
         sort_key = VIEW_CHANNEL_COLUMNS_MAP[(ctx.max or ctx.min).upper()]
@@ -111,3 +110,91 @@ def channel(ctx):
 
         click.echo(prnt_str)
     return
+
+def node(ctx):
+    """ Prints a summary of a peer from this node's perspective """
+    root_conf = ctx.parent.parent
+    testnet = True if root_conf.config['LNT'].get('testnet', 'False') == 'True' else False
+
+    # node data
+    nd = {
+        'shared_channels': {}
+    }
+
+    # from ptpdb import set_trace
+    # set_trace()
+    try:
+        node_info = getNodeInfo(ctx, ctx.node_key)
+    except Exception as e:
+        if 'unable to find node' in str(e.code):
+            click.echo('\nUnable to find node in local network graph')
+        else:
+            # unknown error
+            click.echo(e.code)
+        return
+
+    nd['alias'] = node_info.node.alias
+    nd['total_capacity'] = int(node_info.total_capacity) * 10 ** -8
+    nd['num_channels'] = node_info.num_channels
+
+    channels = listChannels(ctx)
+    # Assemble all channels we have with node
+    for ch_key in channels.keys():
+        if channels[ch_key]['remote_pubkey'] == ctx.node_key:
+            nd['shared_channels'][ch_key] = channels[ch_key]
+
+    nd['noderank'] = get_1ml_info(testnet, ctx.node_key).get('noderank')
+
+    # Print
+
+    if nd.get('alias', False):
+        header = "{} - ( {} )".format(nd['alias'], ctx.node_key)
+    else:
+        header = "{}".format(ctx.node_key)
+
+    total_capacity = "Total Capacity: {}".format(nd['total_capacity'])
+
+    number_of_channels = "Number of channels: {}".format(nd['num_channels'])
+
+    number_of_shared_channels = "Number of shared channels: {}".format(len(nd['shared_channels']))
+
+    shared_channel_breakdown = None
+    if len(nd['shared_channels']) != 0:
+        sbc = ''
+        for ch_id in nd['shared_channels'].keys():
+            channel = nd['shared_channels'][ch_id]
+
+            sbc += '\n' + \
+                   '    ChannelID: {}\n'.format(ch_id) + \
+                   '    Capacity: {}\n'.format(channel['capacity']) + \
+                   '    Local Balance: {}\n'.format(channel['local_balance']) + \
+                   '    Remote Balance: {}\n'.format(channel['remote_balance']) + \
+                   '    Total Sent: {}\n'.format(channel['total_satoshis_sent']) + \
+                   '    Total Recieved: {}'.format(channel['total_satoshis_received']) + \
+                   '\n'
+        shared_channel_breakdown = sbc
+
+    if nd.get('noderank'):
+        ml_header = "1ml link: {}".format(
+            "https://1ml.com{}/node/{}".format('/testnet' if testnet else '', ctx.node_key))
+    else:
+        ml_header = "1ml link: {}".format("Not known to 1ml")
+
+    ml_ranking = None
+    if nd.get('noderank'):
+        ml_ranking = '    CapacityRank: #{}\n'.format(nd['noderank']['capacity']) + \
+                     '    ChannelCountRank: #{}\n'.format(nd['noderank']['channelcount']) + \
+                     '    AgeRank: #{}\n'.format(nd['noderank']['age']) + \
+                     '    GrowthRank: #{}\n'.format(nd['noderank']['growth'])
+
+    click.echo('\n' +
+        header + '\n' +
+        len(header)*'-' + '\n' +
+        total_capacity + '\n' +
+        number_of_channels + '\n' +
+        number_of_shared_channels + '\n' +
+        (shared_channel_breakdown if shared_channel_breakdown else '') + '\n' +
+        ml_header + '\n' +
+        ml_ranking if ml_ranking else '' + '\n')
+
+

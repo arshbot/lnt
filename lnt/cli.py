@@ -164,6 +164,15 @@ def channel(ctx, csv, monthsago, max, min):
     cmd_view.channel(ctx)
     return
 
+@view.command()
+@click.argument('node_key', nargs=1)
+@click.pass_context
+def node(ctx, node_key):
+    ctx.node_key = node_key
+    ctx.stub, ctx.macaroon = utils.create_stub(ctx)
+
+    cmd_view.node(ctx)
+
 @main.group()
 @click.pass_context
 def kill(ctx):
