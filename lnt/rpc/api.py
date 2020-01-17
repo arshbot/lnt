@@ -12,6 +12,11 @@ def listChannels(ctx, active_only:bool=False):
 
     return channels
 
+def getNodeInfo(ctx, node_key, include_channels:bool=False):
+    request = ln.NodeInfoRequest(pub_key=node_key, include_channels=include_channels)
+    response = ctx.stub.GetNodeInfo(request, metadata=[('macaroon', ctx.macaroon)])
+    return response # praying to baby jesus I don't need to normalize
+
 def getChanInfo(ctx, chan_id: int):
     request = ln.ChanInfoRequest(chan_id=chan_id)
     response = ctx.stub.GetChanInfo(request, metadata=[('macaroon', ctx.macaroon)])
