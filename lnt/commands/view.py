@@ -6,7 +6,8 @@ from decimal import Decimal
 import click
 
 # Mark Local imports
-from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory, getNodeInfo
+from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory, \
+        getNodeInfo, getInfo
 from lnt.constants import VIEW_CHANNEL_COLUMNS_DEFAULT, VIEW_CHANNEL_COLUMNS_MAP
 from lnt.commands.utils.utils import get_1ml_info
 
@@ -34,13 +35,20 @@ def channel(ctx):
         except KeyError:
             pass
 
+    # getinfo
+    self_info = getInfo(ctx)
+
     # Per channel chores
     for ch_id in list(channels):
         chan_info = getChanInfo(ctx, chan_id=int(ch_id))
-        ml_info = get_1ml_info(testnet, channels[ch_id]['remote_pubkey'])
 
-        # TODO: capacity seems to get weird here
-        channels[ch_id] = { **channels[ch_id], **chan_info, **ml_info }
+        assumed_peer = chan_info['node1_pub']
+        if assumed_peer == self_info['identity_pubkey']:
+            assumed_peer = chan_info['node2_pub']
+
+        node_info = getNodeInfo(ctx, assumed_peer)
+
+        channels[ch_id] = { **channels[ch_id], **chan_info, **node_info }
 
 
         # Prep for ForwardHistory call
@@ -93,7 +101,7 @@ def channel(ctx):
                             str(len(channel['pending_htlcs'])),
                             time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update'])),
                             str(num_channels_with_peer[channel['remote_pubkey']]),
-                            str(channel.get('alias', ''))
+                            str(channel['node'].get('alias', ''))
                             )
         else:
             prnt_str = format_str.format(
@@ -105,7 +113,7 @@ def channel(ctx):
                             str(len(channel['pending_htlcs'])).ljust(15),
                             str(time.strftime('%Y-%m-%d %H:%M', time.gmtime(channel['last_update']))).ljust(18),
                             str(num_channels_with_peer[channel['remote_pubkey']]).ljust(18),
-                            str(channel.get('alias', ''))
+                            str(channel['node'].get('alias', ''))
                             )
 
         click.echo(prnt_str)
@@ -121,8 +129,6 @@ def node(ctx):
         'shared_channels': {}
     }
 
-    # from ptpdb import set_trace
-    # set_trace()
     try:
         node_info = getNodeInfo(ctx, ctx.node_key)
     except Exception as e:
@@ -138,6 +144,7 @@ def node(ctx):
     nd['num_channels'] = node_info.num_channels
 
     channels = listChannels(ctx)
+
     # Assemble all channels we have with node
     for ch_key in channels.keys():
         if channels[ch_key]['remote_pubkey'] == ctx.node_key:
@@ -146,7 +153,6 @@ def node(ctx):
     nd['noderank'] = get_1ml_info(testnet, ctx.node_key).get('noderank')
 
     # Print
-
     if nd.get('alias', False):
         header = "{} - ( {} )".format(nd['alias'], ctx.node_key)
     else:
