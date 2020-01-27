@@ -8,7 +8,7 @@ from .utils import utils
 
 
 def channel(ctx):
-    testnet = ctx.parent.parent.config['LNT'].get('testnet', False)
+    testnet = ctx.parent.parent.config['LNT'].getboolean('testnet', False)
     chan_info = getChanInfo(ctx, ctx.channel_id)
     funding_txid, output_index = chan_info['chan_point'].split(':')
 
@@ -30,12 +30,12 @@ def channel(ctx):
         else:
             click.echo("Unhandled Error: " + str(error))
         return
-    
+
     if not ctx.streaming:
         click.echo(
         "Closing Tx Confirming: {}\nView it here: https://blockstream.info{}{}"\
             .format(closing_tx, '/testnet/' if testnet else '/', closing_tx))
 
     return
-    
+
 
