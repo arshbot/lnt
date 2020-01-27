@@ -18,6 +18,25 @@ def create_stub(ctx):
     stub = lnrpc.LightningStub(channel)
     return stub, macaroon
 
+def normalize_self_info(response):
+    return {a:getattr(response, a) for a in dir(response)[-15:]}
+
+def normalize_node_info(response):
+    return {
+            'channels': response.channels,
+            'node': {
+                'last_update': response.node.last_update,
+                'pub_key': response.node.pub_key,
+                'alias': response.node.alias,
+                'addresses': [
+                    {'network':x.network, 'addr': x.addr} for x in
+                        response.node.addresses
+                ],
+                'color': response.node.color,
+            },
+            'num_channels': response.num_channels,
+            'total_capacity': response.total_capacity,
+    }
 
 def normalize_channels(channels):
     channels_d = {
