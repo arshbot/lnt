@@ -1,6 +1,7 @@
 # Mark standard lib imports
 import time, datetime, calendar
 from decimal import Decimal
+import asyncio
 
 # Mark 3rd party lib imports
 import click
@@ -10,6 +11,8 @@ from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory, \
         getNodeInfo, getInfo
 from lnt.constants import VIEW_CHANNEL_COLUMNS_DEFAULT, VIEW_CHANNEL_COLUMNS_MAP
 from lnt.commands.utils.utils import get_1ml_info
+
+loop = asyncio.get_event_loop()
 
 def channel(ctx):
     testnet = ctx.parent.parent.config['LNT'].get('testnet', False)
@@ -39,7 +42,7 @@ def channel(ctx):
     self_info = getInfo(ctx)
 
     # Per channel chores
-    for ch_id in list(channels):
+    async def get_chan_info_chores(ch_id):
         chan_info = getChanInfo(ctx, chan_id=int(ch_id))
 
         assumed_peer = chan_info['node1_pub']
@@ -50,8 +53,6 @@ def channel(ctx):
 
         channels[ch_id] = { **channels[ch_id], **chan_info, **node_info }
 
-
-        # Prep for ForwardHistory call
         channels[ch_id]['forward_incoming'] = 0
         channels[ch_id]['forward_outgoing'] = 0
         channels[ch_id]['forwards'] = channels[ch_id]['forward_incoming'] + channels[ch_id]['forward_outgoing']
@@ -59,6 +60,12 @@ def channel(ctx):
 
         # Count channels by peer
         num_channels_with_peer[channels[ch_id]['remote_pubkey']] = num_channels_with_peer.get(channels[ch_id]['remote_pubkey'], 0) + 1
+
+    async_tasks = []
+    for ch_id in list(channels):
+       async_tasks.append(loop.create_task(get_chan_info_chores(ch_id)))
+
+    loop.run_until_complete(asyncio.gather(*async_tasks))
 
     # Sort the things
     if ctx.sort:
@@ -202,5 +209,4 @@ def node(ctx):
         (shared_channel_breakdown if shared_channel_breakdown else '') + '\n' +
         ml_header + '\n' +
         ml_ranking if ml_ranking else '' + '\n')
-
 
