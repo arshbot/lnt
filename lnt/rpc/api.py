@@ -12,6 +12,20 @@ def listChannels(ctx, active_only:bool=False):
 
     return channels
 
+def getInfo(ctx):
+    request = ln.GetInfoRequest()
+    response = ctx.stub.GetInfo(request, metadata=[('macaroon', ctx.macaroon)])
+    info = utils.normalize_self_info(response)
+
+    return info
+
+def getNodeInfo(ctx, node_key, include_channels:bool=False):
+    request = ln.NodeInfoRequest(pub_key=node_key, include_channels=include_channels)
+    response = ctx.stub.GetNodeInfo(request, metadata=[('macaroon', ctx.macaroon)])
+    node_info = utils.normalize_node_info(response)
+
+    return node_info
+
 def getChanInfo(ctx, chan_id: int):
     request = ln.ChanInfoRequest(chan_id=chan_id)
     response = ctx.stub.GetChanInfo(request, metadata=[('macaroon', ctx.macaroon)])

@@ -57,7 +57,6 @@ def main(ctx, config, verbose):
     # TODO: Allow for custom lnt dir
     config_path = config
 
-
     if not config_path:
 
         # Default lnt dir is in constants.py
@@ -67,7 +66,6 @@ def main(ctx, config, verbose):
         # Checks if the default config is available
         if not check_config_exists():
             create_config()
-            raise click.FileError(filename="config", hint="Error: please configure config at "+const.DEFAULT_CONF_PATH)
 
         config_path = const.DEFAULT_CONF_PATH
 
@@ -165,6 +163,15 @@ def channel(ctx, csv, monthsago, max, min):
 
     cmd_view.channel(ctx)
     return
+
+@view.command()
+@click.argument('node_key', nargs=1)
+@click.pass_context
+def node(ctx, node_key):
+    ctx.node_key = node_key
+    ctx.stub, ctx.macaroon = utils.create_stub(ctx)
+
+    cmd_view.node(ctx)
 
 @main.group()
 @click.pass_context
