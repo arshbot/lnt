@@ -11,6 +11,7 @@ from lnt.rpc.api import listChannels, getChanInfo, getForwardingHistory, \
         getNodeInfo, getInfo
 from lnt.constants import VIEW_CHANNEL_COLUMNS_DEFAULT, VIEW_CHANNEL_COLUMNS_MAP
 from lnt.commands.utils.utils import get_1ml_info
+from lnt.graphics.utils import Spinner
 
 loop = asyncio.get_event_loop()
 
@@ -65,7 +66,8 @@ def channel(ctx):
     for ch_id in list(channels):
        async_tasks.append(loop.create_task(get_chan_info_chores(ch_id)))
 
-    loop.run_until_complete(asyncio.gather(*async_tasks))
+    with Spinner('Asking LND nicely...'):
+        loop.run_until_complete(asyncio.gather(*async_tasks))
 
     # Sort the things
     if ctx.sort:
