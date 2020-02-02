@@ -2,6 +2,7 @@ import os
 import lnt.constants as const
 import click
 
+# Mark config utils
 def check_config_exists(fld=const.DEFAULT_DIR_PATH):
     """ Check if config file exists """
     exists = os.path.exists(const.DEFAULT_CONF_PATH)
@@ -15,7 +16,6 @@ def check_lnt_folder_exists(fld=const.DEFAULT_DIR_PATH):
 def create_lnt_folder(fld=const.DEFAULT_DIR_PATH):
     """ Creates a config folder and nested dirs at the specified location """
     os.mkdir(fld)
-    os.mkdir(fld +"/rebalances/")
     return
 
 def create_config(config_path=const.DEFAULT_CONF_PATH):
@@ -48,3 +48,25 @@ def validate_config(config):
        raise click.ClickException("Provided config file failed validation")
 
     return config, passed
+
+# Mark cache utils
+def check_cache_exists(fld=const.DEFAULT_CACHE_DIR_PATH):
+    """ Check if cache files exist"""
+    exists = os.path.exists(const.DEFAULT_CACHE_DIR_PATH)
+    if exists:
+        if not os.path.exists(const.DEFAULT_CACHE_NODE_PATH):
+            return False
+        return True
+    else:
+        return False
+
+def create_cache_dir(fld=const.DEFAULT_CACHE_DIR_PATH):
+    try:
+        os.mkdir(fld)
+    except FileExistsError:
+        return
+
+def create_node_cache(cache_path=const.DEFAULT_CACHE_NODE_PATH):
+    with open(cache_path, "w") as config:
+        config.write(const.EMPTY_NODE_CACHE)
+    return

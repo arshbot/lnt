@@ -1,4 +1,4 @@
-import os, sys, click
+import os, sys, click, json
 from decimal import Decimal
 from configparser import ParsingError, ConfigParser
 from lnt.constants import DEFAULT_DIR_PATH, DEFAULT_MONTHS_AGO
@@ -54,7 +54,6 @@ def main(ctx, config, verbose):
     """ lnt is a command line tool designed to be a better lncli for sysadmins
     and consumers
     """
-    # TODO: Allow for custom lnt dir
     config_path = config
 
     if not config_path:
@@ -68,8 +67,11 @@ def main(ctx, config, verbose):
             create_config()
 
         config_path = const.DEFAULT_CONF_PATH
+        config = ConfigParser()
 
-    config = ConfigParser()
+        if not check_cache_exists():
+            create_cache_dir()
+            create_node_cache()
 
     # Config validation
     try:
@@ -78,11 +80,16 @@ def main(ctx, config, verbose):
 
         if not passed:
             raise Exception
-
     except Exception:
         raise Exception("Invalid config file provided")
 
+    try:
+        node_cache = json.loads(open(const.DEFAULT_CACHE_NODE_PATH).read())
+    except Exception:
+        raise Exception("Invalid cache file found")
+
     ctx.config = config
+    ctx.node_cache = node_cache
     ctx.verbose = verbose
 
 
