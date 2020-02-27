@@ -47,9 +47,9 @@ class ComplexCLI(click.MultiCommand):
 @click.group(invoke_without_command=True)
 @click.option('--config', metavar='CONFIG_PATH', type=click.Path(exists=True,
      file_okay=True, resolve_path=True, readable=True),
-         help="Points to a non default config file")
+         help='Points to a non default config file.')
 @click.option('--verbose', is_flag=True, help='Enables verbose mode.')
-@click.option('--version', is_flag=True, help='Prints the version')
+@click.option('--version', is_flag=True, help='Prints the version.')
 @click.pass_context
 def main(ctx, config, verbose, version):
     """ lnt is a command line tool designed to be a better lncli for sysadmins
@@ -91,37 +91,39 @@ def main(ctx, config, verbose, version):
     ctx.config = config
     ctx.verbose = verbose
 
-
-@main.group()
-@click.pass_context
-def create(ctx):
-    """ Creates a new channel, rebalance, invoice, or payment """
-    return
-
-@create.command()
-def channel():
-    cmd_create.channel()
-    return
-
-@create.command()
-@click.option('--max', '-m', is_flag=True, help="Rebalance maximum amount from channels")
-@click.option('--name', '-n', metavar='NAME', help="Name a rebalance image")
-@click.pass_context
-def rebalance(ctx, max, name):
-    ctx.max = max
-    ctx.name = name
-    cmd_create.rebalance(ctx)
-    return
-
-@create.command()
-def invoice():
-    cmd_create.invoice()
-    return
-
-@create.command()
-def payment():
-    cmd_create.payment()
-    return
+# Disabling because not implemented
+# 
+# @main.group()
+# @click.pass_context
+# def create(ctx):
+#     """ Creates a new channel, rebalance, invoice, or payment """
+#     return
+# 
+# @create.command()
+# def channel():
+#     cmd_create.channel()
+#     return
+# 
+# 
+# @create.command()
+# @click.option('--max', '-m', is_flag=True, help="Rebalance maximum amount from channels")
+# @click.option('--name', '-n', metavar='NAME', help="Name a rebalance image")
+# @click.pass_context
+# def rebalance(ctx, max, name):
+#     ctx.max = max
+#     ctx.name = name
+#     cmd_create.rebalance(ctx)
+#     return
+# 
+# @create.command()
+# def invoice():
+#     cmd_create.invoice()
+#     return
+# 
+# @create.command()
+# def payment():
+#     cmd_create.payment()
+#     return
 
 @main.group()
 @click.pass_context
@@ -139,6 +141,7 @@ def view(ctx):
 @click.option('--min', metavar='COLUMN', help="Sorts COLUMN by min", callback=validators.columns)
 @click.pass_context
 def channel(ctx, csv, monthsago, max, min):
+    """ Payment channel """
     ctx.sort = None
     ctx.csv = csv
     ctx.max = max
@@ -174,6 +177,7 @@ def channel(ctx, csv, monthsago, max, min):
 @click.argument('node_key', nargs=1)
 @click.pass_context
 def node(ctx, node_key):
+    """ Lnd node """
     ctx.node_key = node_key
     ctx.stub, ctx.macaroon = utils.create_stub(ctx)
 
