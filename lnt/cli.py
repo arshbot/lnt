@@ -44,16 +44,22 @@ class ComplexCLI(click.MultiCommand):
         return mod.cli
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.option('--config', metavar='CONFIG_PATH', type=click.Path(exists=True,
      file_okay=True, resolve_path=True, readable=True),
          help="Points to a non default config file")
-@click.option('--verbose', '-v', is_flag=True, help='Enables verbose mode.')
+@click.option('--verbose', is_flag=True, help='Enables verbose mode.')
+@click.option('--version', is_flag=True, help='Prints the version')
 @click.pass_context
-def main(ctx, config, verbose):
+def main(ctx, config, verbose, version):
     """ lnt is a command line tool designed to be a better lncli for sysadmins
     and consumers
     """
+
+    if version:
+        import pkg_resources  # part of setuptools
+        click.echo(pkg_resources.require("lnt")[0].version)
+
     # TODO: Allow for custom lnt dir
     config_path = config
 
